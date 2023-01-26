@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "redhat.vscode-yaml",
+    "editorconfig.editorconfig",
+    "streetsidesoftware.code-spell-checker",
+    "dprint.dprint",
+    "haskell.haskell",
+    "jnoortheen.nix-ide"
+  ]
+}

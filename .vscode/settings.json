@@ -1,0 +1,14 @@
+{
+  "editor.defaultFormatter": "dprint.dprint",
+  "editor.formatOnSave": true,
+  "cSpell.words": [
+    "aeson",
+    "cachix",
+    "dprint",
+    "Hspec",
+    "nixos",
+    "nixpkgs",
+    "popd",
+    "shfmt"
+  ]
+}

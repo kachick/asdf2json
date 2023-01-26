@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'app/**'
+      - 'scripts/**'
+      - 'src/**'
+      - 'test/**'
+      - '**.cabal'
+      - '**.nix'
+  pull_request:
+    paths:
+      - '.github/workflows/ci.yml'
+      - 'app/**'
+      - 'scripts/**'
+      - 'src/**'
+      - 'test/**'
+      - '**.cabal'
+      - '**.nix'
+  workflow_dispatch:
+
+jobs:
+  hspec:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v18
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      - run: nix-build
+      - run: cabal update
+      - run: cabal test
