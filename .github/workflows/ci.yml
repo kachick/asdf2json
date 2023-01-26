@@ -36,6 +36,7 @@ jobs:
         with:
           name: asdf2json
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
+          extraPullNames: kachick
       - run: nix-build
       - name: Cache cabal global
         id: cache-cabal-global
