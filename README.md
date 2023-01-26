@@ -14,8 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - name: Install asdf parser
+        run: wget https://github.com/kachick/asdf2json/releases/download/v1/asdf2json && chmod 755 asdf2json
       - id: asdf-parser
-        run: cat .tool-versions | asdf2json | echo "json=$(</dev/stdin)" | tee -a $GITHUB_OUTPUT
+        run: cat .tool-versions | ./asdf2json | echo "json=$(</dev/stdin)" | tee -a $GITHUB_OUTPUT
       - uses: actions/setup-node@v3
         with:
           node-version: "${{ fromJson(steps.asdf-parser.outputs.json).nodejs }}"
