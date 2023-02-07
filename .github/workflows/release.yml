@@ -14,6 +14,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v19
+        with:
+          nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/5a350a8f31bb7ef0c6e79aea3795a890cf7743d4.tar.gz
       - id: detect_nixpkgs
         name: Detect nixpkgs version
         run: echo "nixpkgs_version=$(nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version' | grep -Po '[^"]+')" | tee -a $GITHUB_OUTPUT
