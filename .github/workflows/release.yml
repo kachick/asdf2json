@@ -14,8 +14,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: cachix/install-nix-action@v19
-      - name: Print nixpkgs version
-        run: nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version'
+      - id: detect_nixpkgs
+        name: Detect nixpkgs version
+        run: echo "nixpkgs_version=$(nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version' | grep -Po '[^"]+')" | tee -a $GITHUB_OUTPUT
       - uses: cachix/cachix-action@v12
         with:
           name: asdf2json
@@ -26,13 +27,13 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cabal
-          key: ${{ runner.os }}-cabal-global-${{ hashFiles('default.nix', '**.cabal') }}
+          key: ${{ runner.os }}-${{ steps.detect_nixpkgs.outputs.nixpkgs_version }}-cabal-global-${{ hashFiles('default.nix', '**.cabal') }}
       - name: Cache cabal local
         id: cache-cabal-local
         uses: actions/cache@v3
         with:
           path: dist-newstyle
-          key: ${{ runner.os }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
+          key: ${{ runner.os }}-${{ steps.detect_nixpkgs.outputs.nixpkgs_version }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
       - name: Cabal update
         if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
         run: cabal update
