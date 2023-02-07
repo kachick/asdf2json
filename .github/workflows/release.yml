@@ -13,9 +13,19 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
+      - name: 'Cache Nix store'
+        uses: actions/cache@v3
+        id: nix-cache
+        with:
+          path: /tmp/nixcache
+          key: ${{ runner.os }}-e521a883757b06720d28d4a303e0b4f7f0d7fcfc-nix
       - uses: cachix/install-nix-action@v19
         with:
           nix_path: nixpkgs=https://github.com/NixOS/nixpkgs/archive/e521a883757b06720d28d4a303e0b4f7f0d7fcfc.tar.gz
+      # https://github.com/cachix/install-nix-action/issues/56#issuecomment-1240991760
+      - name: 'Import Nix store cache'
+        if: "steps.nix-cache.outputs.cache-hit == 'true'"
+        run: 'nix-store --import < /tmp/nixcache'
       - id: detect_nixpkgs
         name: Detect nixpkgs version
         run: echo "nixpkgs_version=$(nix-instantiate --eval -E '(import <nixpkgs> {}).lib.version' | tr -d '"')" | tee -a $GITHUB_OUTPUT
@@ -23,7 +33,20 @@ jobs:
         with:
           name: asdf2json
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix-build
+      - name: Print current versions
+        run: |
+          nix-shell --run '
+            which ghc
+            ghc --version
+            which cabal
+            cabal --version
+            which stack
+            stack --version
+            dprint --version
+            '
+      - name: 'Export Nix store cache'
+        if: "steps.nix-cache.outputs.cache-hit != 'true'"
+        run: "nix-store --export $(find /nix/store -maxdepth 1 -name '*-*') > /tmp/nixcache"
       - name: Cache cabal global
         id: cache-cabal-global
         uses: actions/cache@v3
@@ -38,9 +61,9 @@ jobs:
           key: ${{ runner.os }}-${{ steps.detect_nixpkgs.outputs.nixpkgs_version }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
       - name: Cabal update
         if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
-        run: cabal update
+        run: nix-shell --run 'cabal update'
       - name: Build
-        run: cabal v2-install --installdir=dist --install-method=copy --overwrite-policy=always
+        run: nix-shell --run 'cabal v2-install --installdir=dist --install-method=copy --overwrite-policy=always'
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
