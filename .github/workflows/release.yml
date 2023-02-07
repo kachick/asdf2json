@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v3
-      - uses: cachix/install-nix-action@v18
+      - uses: cachix/install-nix-action@v19
         with:
           nix_path: nixpkgs=channel:nixos-unstable
       - name: Print nixpkgs version
@@ -35,6 +35,9 @@ jobs:
         with:
           path: dist-newstyle
           key: ${{ runner.os }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
+      - name: Cabal update
+        if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
+        run: cabal update
       - name: Build
         run: cabal v2-install --installdir=dist --install-method=copy --overwrite-policy=always
       - name: Release
