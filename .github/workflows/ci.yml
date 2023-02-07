@@ -49,4 +49,7 @@ jobs:
         with:
           path: dist-newstyle
           key: ${{ runner.os }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
+      - name: Cabal update
+        if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
+        run: cabal update
       - run: cabal test
