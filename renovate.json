@@ -7,5 +7,11 @@
   "enabledManagers": ["nix", "regex"],
   "nix": {
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "extends": ["schedule:monthly"],
+      "matchPackagePrefixes": ["dprint"]
+    }
+  ]
 }
