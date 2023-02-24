@@ -40,10 +40,9 @@ jobs:
         with:
           name: asdf2json
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
-      - run: nix-build
       - name: Print current versions
         run: |
-          nix-shell --run '
+          nix develop --command bash -c '
             which ghc
             ghc --version
             which cabal
@@ -66,5 +65,5 @@ jobs:
           key: ${{ runner.os }}-${{ steps.detect_nixpkgs.outputs.nixpkgs_version }}-cabal-global-${{ hashFiles('default.nix', '**.cabal') }}
       - name: Cabal update
         if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
-        run: nix-shell --run 'cabal update'
-      - run: nix-shell --run 'cabal test'
+        run: nix develop --command bash -c 'cabal update'
+      - run: nix develop --command bash -c 'cabal test'

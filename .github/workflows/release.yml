@@ -26,7 +26,7 @@ jobs:
       - run: nix-build
       - name: Print current versions
         run: |
-          nix-shell --run '
+          nix develop --command bash -c '
             which ghc
             ghc --version
             which cabal
@@ -49,9 +49,9 @@ jobs:
           key: ${{ runner.os }}-${{ steps.detect_nixpkgs.outputs.nixpkgs_version }}-cabal-local-${{ hashFiles('default.nix', '**.cabal') }}
       - name: Cabal update
         if: steps.cache-cabal-global.outputs.cache-hit != 'true' || steps.cache-cabal-local.outputs.cache-hit != 'true'
-        run: nix-shell --run 'cabal update'
+        run: nix develop --command bash -c 'cabal update'
       - name: Build
-        run: nix-shell --run 'cabal v2-install --installdir=dist --install-method=copy --overwrite-policy=always'
+        run: nix develop --command bash -c 'cabal v2-install --installdir=dist --install-method=copy --overwrite-policy=always'
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
